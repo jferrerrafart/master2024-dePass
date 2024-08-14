@@ -12,9 +12,15 @@ import {
 import { LogoutOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import logo from "../noImg.png";
-import axios from "axios";
+//import axios from "axios";
 import { CHAINS_CONFIG } from "../chains";
 import { ethers } from "ethers";
+
+//const address = "0x67B0829FBE67903F579a3CC7775b10a7C33A7e66";
+
+//const providerUrl = "https://mainnet.infura.io/v3/626b7233f4b0479cbfeba309abad79ab";
+//const provider = new ethers.JsonRpcProvider(providerUrl);
+//const provider = new ethers.InfuraProvider(selectedChain, "626b7233f4b0479cbfeba309abad79ab");
 
 function WalletView({
   wallet,
@@ -191,7 +197,7 @@ function WalletView({
     }
   }
 
-  async function getAccountTokens() {
+  /*async function getAccountTokens() {
     setFetching(true);
 
     const res = await axios.get(`http://localhost:3001/getTokens`, {
@@ -214,7 +220,65 @@ function WalletView({
     setBalance(response.balance);
 
     setFetching(false);
+  } */
+
+    
+  async function getAccountTokens() {
+    setFetching(true);
+
+    try {
+      // Obtener el balance del usuario
+      const provider = new ethers.InfuraProvider(selectedChain, "626b7233f4b0479cbfeba309abad79ab");
+      const balance = await provider.getBalance(wallet);
+
+      // Convertir el balance de wei a ether
+      const balanceInEth = ethers.formatEther(balance);
+      setBalance(balanceInEth);
+
+      /*// Aquí se necesitaría el contrato de los tokens para poder obtener los tokens del usuario
+      // Esto depende del contrato ERC-20 específico del token. Aquí te muestro un ejemplo
+      // básico de cómo podrías obtener el balance de un token en particular.
+
+      const tokenAddress = "0x..."; // Dirección del contrato del token
+      const tokenABI = [
+        // ABI mínima para interactuar con el contrato
+        "function balanceOf(address) view returns (uint256)",
+      ];
+
+      const tokenContract = new ethers.Contract(
+        tokenAddress,
+        tokenABI,
+        provider
+      );
+      const tokenBalance = await tokenContract.balanceOf(wallet);
+      const formattedTokenBalance = ethers.formatUnits(
+        tokenBalance,
+        18
+      ); // 18 es el número de decimales, puede variar
+
+      // Aquí podrías establecer los tokens obtenidos en el estado
+      setTokens([{ tokenAddress, balance: formattedTokenBalance }]);
+
+      // Para NFTs, necesitarías interactuar con contratos ERC-721 o ERC-1155 de manera similar
+      // Aquí te doy un ejemplo simple para ERC-721:
+
+      const nftAddress = "0x..."; // Dirección del contrato del NFT
+      const nftABI = ["function balanceOf(address) view returns (uint256)"];
+
+      const nftContract = new ethers.Contract(nftAddress, nftABI, provider);
+      const nftBalance = await nftContract.balanceOf(wallet);
+
+      if (nftBalance.gt(0)) {
+        // Si el usuario tiene NFTs, podrías agregar la lógica para recuperar más detalles
+        setNfts([{ nftAddress, balance: nftBalance.toString() }]);
+      } */
+    } catch (error) {
+      console.error("Error fetching tokens or balance:", error);
+    } finally {
+      setFetching(false);
+    }
   }
+    
 
   function logout() {
     setSeedPhrase(null);
